@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"ticket-seckill/util"
+	"time"
+)
 
 const (
 	CLOSED int8 = -1
@@ -10,24 +13,23 @@ const (
 )
 
 type Order struct {
-	Id      int64  `db:"id"`
-	OrderId string `db:"order_id"`
-	UserId  int64  `db:"user_id"`
-	GoodsId int64  `db:"goods_id"`
+	Id      uint64 `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	OrderId string `gorm:"type:varchar(32);uniqueIndex:idx_uid_gid;not null" json:"order_id"`
+	UserId  int64  `gorm:"not null" json:"user_id"`
+	GoodsId int64  `gorm:"not null" json:"goods_id"`
 }
 
 type OrderInfo struct {
-	Id         int64     `db:"id"`
-	OrderId    string    `db:"order_id"`
-	UserId     int64     `db:"user_id"`
-	GoodsId    int64     `db:"goods_id"`
-	GoodsName  string    `db:"goods_name"`
-	GoodsImg   string    `db:"goods_img"`
-	GoodsPrice int64     `db:"goods_price"`
-	PaymentId  int64     `db:"payment_id"`
-	Status     int8      `db:"status"`
-	CreateTime time.Time `db:"create_time"`
-	UpdateTime time.Time `db:"update_time"`
+	Id         int64     `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	OrderId    string    `gorm:"type:varchar(32);uniqueIndex:idx_order_id;not null" json:"order_id"`
+	UserId     int64     `gorm:"not null" json:"user_id"`
+	GoodsId    int64     `gorm:"not null" json:"goods_id"`
+	GoodsName  string    `gorm:"type:varchar(128);not null" json:"goods_name"`
+	GoodsImg   string    `gorm:"type:varchar(128);not null" json:"goods_img"`
+	GoodsPrice int64     `gorm:"not null" json:"goods_price"`
+	Status     int8      `gorm:"default:0;not null" json:"status"`
+	CreateTime time.Time `gorm:"autoCreateTime;not null" json:"create_time"`
+	UpdateTime time.Time `gorm:"autoUpdateTime;not null" json:"update_time"`
 }
 
 func NewOrderInfo(userId int64, goods Goods) OrderInfo {
@@ -44,7 +46,7 @@ func NewOrderInfo(userId int64, goods Goods) OrderInfo {
 }
 
 func createOrderId() string {
-	return time.Now().Format("20060102150405")
+	return time.Now().Format("20060102150405") + util.CreateKey(util.Number, 6)
 }
 
 type OrderCount struct {

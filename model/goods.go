@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"ticket-seckill/infra/code"
+	"time"
+)
 
 const (
 	ENDED      int8 = -1 // 已结束
@@ -10,12 +13,26 @@ const (
 )
 
 type Goods struct {
-	Id          int64     `db:"id"`
-	Name        string    `db:"name"`
-	Img         string    `db:"img"`
-	OriginPrice int64     `db:"origin_price"`
-	Price       int64     `db:"price"`
-	Stock       int       `db:"stock"`
-	StartTime   time.Time `db:"start_time"`
-	EndTime     time.Time `db:"end_time"`
+	Id          int64     `gorm:"primaryKey;autoIncrement;comment:'商品id'"`   // `id` 字段，主键且自增
+	Name        string    `gorm:"type:varchar(255);not null;comment:'商品名称'"` // `name` 字段，非空
+	Img         string    `gorm:"type:varchar(255);not null;comment:'商品图片'"` // `img` 字段，非空
+	OriginPrice int64     `gorm:"not null;comment:'商品价格'"`                   // `origin_price` 字段，非空
+	Price       int64     `gorm:"not null;comment:'秒杀价格'"`                   // `price` 字段，非空
+	Stock       uint32    `gorm:"not null;comment:'库存'"`                     // `stock` 字段，非负
+	StartTime   time.Time `gorm:"not null;comment:'秒杀开始时间'"`                 // `start_time` 字段，非空
+	EndTime     time.Time `gorm:"not null;comment:'秒杀结束时间'"`
+}
+
+func (goods Goods) Check() (err error) {
+	now := time.Now().Unix()
+	startTime := goods.StartTime.Unix()
+	endTime := goods.EndTime.Unix()
+	if now < startTime {
+		err = code.MiaoshaNotStart
+	} else if now > endTime {
+		err = code.MiaoshaEnded
+	} else if goods.Stock <= 0 {
+		err = code.GoodsSaleOut
+	}
+	return
 }

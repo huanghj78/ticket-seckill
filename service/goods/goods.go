@@ -3,6 +3,8 @@ package goods
 import (
 	"sync"
 	"ticket-seckill/infra/cache"
+	"ticket-seckill/infra/code"
+	"ticket-seckill/model"
 	"ticket-seckill/repository"
 	"ticket-seckill/service"
 
@@ -23,4 +25,17 @@ func InitService() {
 type goodsService struct {
 	goodsRepository repository.GoodsRepository
 	redis           *redis.Client
+}
+
+func (s *goodsService) GetGoods(id int64) (goods model.Goods, err error) {
+	if goods, err = s.goodsRepository.GetGoods(id); err != nil {
+		err = code.DBErr
+		return
+	}
+	return
+}
+
+func (s *goodsService) SeckillNavie(usdeId, goodsId int64) (err error) {
+	err = s.goodsRepository.SeckillNaive(usdeId, goodsId)
+	return
 }
