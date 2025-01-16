@@ -1,7 +1,6 @@
 package model
 
 import (
-	"ticket-seckill/util"
 	"time"
 )
 
@@ -32,9 +31,9 @@ type OrderInfo struct {
 	UpdateTime time.Time `gorm:"autoUpdateTime;not null" json:"update_time"`
 }
 
-func NewOrderInfo(userId int64, goods Goods) OrderInfo {
+func NewOrderInfo(userId int64, goods Goods, orderId string) OrderInfo {
 	order := OrderInfo{
-		OrderId:    createOrderId(),
+		OrderId:    orderId,
 		UserId:     userId,
 		GoodsId:    goods.Id,
 		GoodsName:  goods.Name,
@@ -43,10 +42,6 @@ func NewOrderInfo(userId int64, goods Goods) OrderInfo {
 		Status:     UNPAID,
 	}
 	return order
-}
-
-func createOrderId() string {
-	return time.Now().Format("20060102150405") + util.CreateKey(util.Number, 6)
 }
 
 type OrderCount struct {

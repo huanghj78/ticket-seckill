@@ -18,9 +18,44 @@ type Goods struct {
 	Img         string    `gorm:"type:varchar(255);not null;comment:'商品图片'"` // `img` 字段，非空
 	OriginPrice int64     `gorm:"not null;comment:'商品价格'"`                   // `origin_price` 字段，非空
 	Price       int64     `gorm:"not null;comment:'秒杀价格'"`                   // `price` 字段，非空
-	Stock       uint32    `gorm:"not null;comment:'库存'"`                     // `stock` 字段，非负
+	Stock       int       `gorm:"not null;comment:'库存'"`                     // `stock` 字段，非负
 	StartTime   time.Time `gorm:"not null;comment:'秒杀开始时间'"`                 // `start_time` 字段，非空
 	EndTime     time.Time `gorm:"not null;comment:'秒杀结束时间'"`
+}
+
+type GoodsVO struct {
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	Img         string `json:"img"`
+	OriginPrice int64  `json:"originPrice"`
+	Price       int64  `json:"price"`
+	Duration    int64  `json:"duration"`
+	Status      int8   `json:"status"`
+}
+
+func (goods Goods) ToVO() GoodsVO {
+	g := GoodsVO{}
+	g.Id = goods.Id
+	g.OriginPrice = goods.OriginPrice
+	g.Name = goods.Name
+	g.Img = goods.Img
+	g.Price = goods.Price
+	startTime := goods.StartTime.Unix()
+	endTime := goods.EndTime.Unix()
+	now := time.Now().Unix()
+	if now < startTime {
+		g.Status = NOTSTARTED
+		g.Duration = startTime - now
+	} else if now >= startTime && now <= endTime {
+		if goods.Stock > 0 {
+			g.Status = ONGOING
+		} else {
+			g.Status = SOLDOUT
+		}
+	} else {
+		g.Status = ENDED
+	}
+	return g
 }
 
 func (goods Goods) Check() (err error) {

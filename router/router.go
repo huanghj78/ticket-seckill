@@ -2,6 +2,7 @@ package router
 
 import (
 	"ticket-seckill/handler"
+	"ticket-seckill/mq"
 	"ticket-seckill/service/goods"
 	"ticket-seckill/service/order"
 
@@ -16,6 +17,7 @@ var (
 func initService() {
 	goods.InitService()
 	order.InitService()
+	mq.Init()
 }
 
 func initHandler() {
@@ -32,5 +34,6 @@ func Init() (router *gin.Engine) {
 	initHandler()
 	router = gin.Default()
 	initRouter(router)
+	mq.Run()
 	return
 }

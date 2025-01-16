@@ -12,6 +12,7 @@ import (
 type GoodsRepository interface {
 	GetGoods(int64) (model.Goods, error)
 	SeckillNaive(int64, int64) error
+	GetGoodsList(page int) (list []model.Goods, err error)
 }
 
 type goodsRepository struct {
@@ -65,4 +66,14 @@ func (r *goodsRepository) SeckillNaive(userId, goodsId int64) (err error) {
 	}
 
 	return nil
+}
+
+func (s *goodsRepository) GetGoodsList(page int) (list []model.Goods, err error) {
+	const pageSize = 10
+	offset := (page - 1) * pageSize
+	result := s.db.Limit(pageSize).Offset(offset).Find(&list)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return list, nil
 }
