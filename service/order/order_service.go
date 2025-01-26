@@ -49,9 +49,9 @@ func (s *orderService) Seckill(userId, goodsId int64) (err error) {
 		return
 	}
 	// 加锁 确保一人一单
-	if err = s.tryLock(userId, goodsId); err != nil {
-		return
-	}
+	// if err = s.tryLock(userId, goodsId); err != nil {
+	// 	return
+	// }
 
 	if err = s.decrStock(goodsId, userId); err != nil {
 		return
@@ -63,11 +63,11 @@ func (s *orderService) Seckill(userId, goodsId int64) (err error) {
 		return
 	}
 
-	mq.RedisMq.Send(goodsId, userId, orderId)
+	mq.RabbitMq.Send(goodsId, userId, orderId)
 
-	if err = s.UnLock(userId, goodsId); err != nil {
-		return
-	}
+	// if err = s.UnLock(userId, goodsId); err != nil {
+	// 	return
+	// }
 
 	return
 

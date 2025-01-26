@@ -25,6 +25,7 @@ func (h *OrderHandler) Seckill(c *gin.Context) {
 		log.Error(err)
 		return
 	}
+	log.Info(r.UserId, r.GoodsId)
 	if err := h.orderService.Seckill(r.UserId, r.GoodsId); err != nil {
 		log.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
